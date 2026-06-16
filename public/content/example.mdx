@@ -25,6 +25,28 @@ browser has no module resolver.
 - A heading (try selecting the heading above)
 - Any run of body text across two sentences
 
+## Data table
+
+Tables render with full GFM support. Select a cell value or header to annotate it.
+
+| Component     | Context type  | Notes                          |
+|---------------|---------------|--------------------------------|
+| Heading       | `heading`     | Captures level (h1–h6)        |
+| Paragraph     | `paragraph`   | Most common annotation target  |
+| Code block    | `codeBlock`   | Tags the annotation as source  |
+| Blockquote    | `blockquote`  | Often flagged as `question`    |
+| List item     | `listItem`    | Annotates individual items     |
+
+## Image annotation
+
+Images can be annotated too — select the caption text below or the descriptive text
+surrounding an image to leave a note about framing, accuracy, or alt text quality.
+
+![A serene mountain landscape with snow-capped peaks reflecting in a still lake](https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop)
+
+*Figure 1: Sample landscape — reviewers might flag whether this image matches the
+surrounding content, or whether the alt text is descriptive enough for accessibility.*
+
 ## A code sample
 
 Code blocks render through Shiki with the `github-dark` theme. Selecting inside a code

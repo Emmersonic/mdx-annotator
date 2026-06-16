@@ -1,6 +1,7 @@
 import { evaluate } from '@mdx-js/mdx';
 import * as runtime from 'react/jsx-runtime';
 import rehypePrettyCode from 'rehype-pretty-code';
+import remarkGfm from 'remark-gfm';
 import { CodeBlock } from './CodeBlock';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState, type ComponentType } from 'react';
@@ -30,6 +31,7 @@ export function MDXRenderer({ file, renderAnnotatable }: MDXRendererProps) {
       .then((mdxText) =>
         evaluate(mdxText, {
           ...runtime,
+          remarkPlugins: [remarkGfm],
           rehypePlugins: [
             [rehypePrettyCode, { theme: 'github-dark', keepBackground: true }],
           ],

@@ -11,6 +11,17 @@ interface AnnotatableProps {
   onAddAnnotation: (partial: Omit<Annotation, 'id' | 'createdAt' | 'status'>) => void;
 }
 
+function applyDraftHighlight(range: Range) {
+  if (typeof CSS === 'undefined' || !('highlights' in CSS)) return;
+  const h = new (window as any).Highlight(range);
+  (CSS as any).highlights.set('comment-draft', h);
+}
+
+function clearDraftHighlight() {
+  if (typeof CSS === 'undefined' || !('highlights' in CSS)) return;
+  (CSS as any).highlights.delete('comment-draft');
+}
+
 export function Annotatable({ children, mdxFile, onAddAnnotation }: AnnotatableProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { rect, text } = useTextSelection(containerRef);
@@ -20,8 +31,17 @@ export function Annotatable({ children, mdxFile, onAddAnnotation }: AnnotatableP
   function handleAddComment() {
     const sel = window.getSelection();
     if (!sel || !text) return;
+    const range = sel.getRangeAt(0).cloneRange();
+    const ctx = captureContext(sel, mdxFile);
+    applyDraftHighlight(range);
     setActiveRect(rect);
-    setActiveContext(captureContext(sel, mdxFile));
+    setActiveContext(ctx);
+  }
+
+  function handleCancel() {
+    clearDraftHighlight();
+    setActiveContext(null);
+    setActiveRect(null);
   }
 
   return (
@@ -36,14 +56,12 @@ export function Annotatable({ children, mdxFile, onAddAnnotation }: AnnotatableP
           context={activeContext}
           onSubmit={(comment, severity) => {
             onAddAnnotation({ context: activeContext, comment, severity });
+            clearDraftHighlight();
             setActiveContext(null);
             setActiveRect(null);
             window.getSelection()?.removeAllRanges();
           }}
-          onCancel={() => {
-            setActiveContext(null);
-            setActiveRect(null);
-          }}
+          onCancel={handleCancel}
         />
       )}
     </div>

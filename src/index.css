@@ -59,6 +59,12 @@
   }
 }
 
+/* Draft comment highlight (CSS Highlight API) */
+::highlight(comment-draft) {
+  background-color: rgb(253 224 71 / 0.45);
+  color: inherit;
+}
+
 /* Shiki / rehype-pretty-code styling */
 [data-rehype-pretty-code-figure] pre {
   @apply overflow-x-auto rounded-lg py-4 text-sm leading-relaxed;
