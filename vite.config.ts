@@ -73,6 +73,9 @@ function devApiPlugin(env: Record<string, string>): Plugin {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
+    // GitHub Pages serves under /<repo>/; the deploy workflow sets VITE_BASE.
+    // Local dev and Vercel stay at root.
+    base: process.env.VITE_BASE || '/',
     plugins: [react(), devApiPlugin(env)],
     resolve: {
       alias: {

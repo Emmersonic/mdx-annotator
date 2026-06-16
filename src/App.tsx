@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge';
 
 const FALLBACK_FILES: FileOption[] = [{ label: 'example.mdx', value: 'example.mdx' }];
 
+// On the static GitHub Pages demo there is no backend, so the send is simulated.
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
+
 export function App() {
   const initialFile = useCurrentFile();
   const [file, setFile] = useState(initialFile);
@@ -21,7 +24,7 @@ export function App() {
 
   // Load the file manifest (best-effort; falls back to a single entry).
   useEffect(() => {
-    fetch('/content/manifest.json')
+    fetch(`${import.meta.env.BASE_URL}content/manifest.json`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error('no manifest'))))
       .then((list: FileOption[]) => Array.isArray(list) && list.length && setFiles(list))
       .catch(() => {});
@@ -51,6 +54,13 @@ export function App() {
   const handleSend = useCallback(
     async (a: Annotation) => {
       setSendingId(a.id);
+      // No serverless function on a static host — simulate the round-trip.
+      if (DEMO_MODE) {
+        await new Promise((r) => setTimeout(r, 500));
+        markSent(a.id);
+        setSendingId(null);
+        return;
+      }
       try {
         const res = await fetch('/api/send-comment', {
           method: 'POST',
@@ -75,7 +85,9 @@ export function App() {
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 px-4 py-2 backdrop-blur">
         <FilePicker value={file} files={files} onChange={changeFile} />
-        <span className="text-xs text-muted-foreground">MDX Annotator</span>
+        <span className="text-xs text-muted-foreground">
+          MDX Annotator{DEMO_MODE ? ' · demo (send simulated)' : ''}
+        </span>
       </header>
 
       <main className="mx-auto max-w-2xl px-6 py-16">

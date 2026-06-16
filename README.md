@@ -69,9 +69,19 @@ npm run build      # tsc -b && vite build → dist/
 npm run preview    # serve the production build locally
 ```
 
-Deploy to Vercel: the SPA builds to `dist/`, and `api/send-comment.ts` runs as a
-serverless function. Set `RESEND_API_KEY`, `LINEAR_INTAKE_EMAIL`, and `RESEND_FROM` in
-the Vercel project's environment variables.
+### Vercel (full app, real email)
+
+The SPA builds to `dist/`, and `api/send-comment.ts` runs as a serverless function. Set
+`RESEND_API_KEY`, `LINEAR_INTAKE_EMAIL`, and `RESEND_FROM` in the Vercel project's
+environment variables.
+
+### GitHub Pages (static demo, auto-deploy)
+
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every push to
+`main` → **https://emmersonic.github.io/mdx-annotator/**. Pages is static-only, so there
+is no `/api` function; the build sets `VITE_DEMO_MODE=true` and the send is **simulated**
+client-side (the header shows "demo (send simulated)"). The base path is handled via
+`VITE_BASE=/mdx-annotator/`. For real email, use the Vercel deploy above.
 
 ## Project layout
 
