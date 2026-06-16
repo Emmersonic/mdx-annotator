@@ -3,9 +3,14 @@ import { Resend } from 'resend';
 import { formatSubject, formatEmailHtml } from '../src/lib/formatEmail';
 import type { Annotation } from '../src/types';
 
-const apiKey = process.env.RESEND_API_KEY;
-const to = process.env.LINEAR_INTAKE_EMAIL;
-const from = process.env.RESEND_FROM ?? 'reviews@yourdomain.com';
+interface RequestBody {
+  annotation: Annotation;
+  _config?: {
+    resendApiKey?: string;
+    linearIntakeEmail?: string;
+    resendFrom?: string;
+  };
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -13,17 +18,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const annotation = req.body as Annotation;
+  const body = req.body as RequestBody;
+
+  // Accept annotation at top level (legacy) or nested under body.annotation.
+  const annotation: Annotation = body.annotation ?? (body as unknown as Annotation);
   if (!annotation?.context?.quote || !annotation.comment) {
     return res.status(400).json({ error: 'Malformed annotation' });
   }
 
+  // Env vars take priority; client-supplied config is the fallback for local use.
+  const apiKey = process.env.RESEND_API_KEY ?? body._config?.resendApiKey ?? '';
+  const to = process.env.LINEAR_INTAKE_EMAIL ?? body._config?.linearIntakeEmail ?? '';
+  const from =
+    process.env.RESEND_FROM ?? body._config?.resendFrom ?? 'reviews@example.com';
+
   const subject = formatSubject(annotation);
   const html = formatEmailHtml(annotation);
 
-  // No credentials configured → simulate so previews/demos still complete the flow.
   if (!apiKey || !to) {
-    console.log(`[send-comment] simulated (no RESEND_API_KEY/LINEAR_INTAKE_EMAIL) → ${subject}`);
+    console.log(`[send-comment] simulated (no credentials) → ${subject}`);
     return res.status(200).json({ ok: true, simulated: true });
   }
 

@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Annotation } from '@/types';
 import { useAnnotations } from '@/hooks/useAnnotations';
+import { useSettings } from '@/hooks/useSettings';
 import { MDXRenderer } from '@/components/MDXRenderer';
 import { Annotatable } from '@/components/Annotatable';
 import { AnnotationSidebar } from '@/components/AnnotationSidebar';
 import { FilePicker, useCurrentFile, type FileOption } from '@/components/FilePicker';
+import { SettingsModal } from '@/components/SettingsModal';
 import { Badge } from '@/components/ui/badge';
 
 const FALLBACK_FILES: FileOption[] = [{ label: 'example.mdx', value: 'example.mdx' }];
@@ -20,6 +22,7 @@ export function App() {
   const [sendingId, setSendingId] = useState<string | null>(null);
 
   const { annotations, addAnnotation, markSent, discard } = useAnnotations();
+  const { settings, save: saveSettings } = useSettings();
   const queued = annotations.filter((a) => a.status === 'queued').length;
 
   // Load the file manifest (best-effort; falls back to a single entry).
@@ -65,7 +68,14 @@ export function App() {
         const res = await fetch('/api/send-comment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(a),
+          body: JSON.stringify({
+            annotation: a,
+            _config: {
+              resendApiKey: settings.resendApiKey,
+              linearIntakeEmail: settings.linearIntakeEmail,
+              resendFrom: settings.resendFrom,
+            },
+          }),
         });
         if (!res.ok) {
           const text = await res.text();
@@ -78,16 +88,19 @@ export function App() {
         setSendingId(null);
       }
     },
-    [markSent],
+    [markSent, settings],
   );
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-30 flex items-center justify-between border-b bg-background/80 px-4 py-2 backdrop-blur">
         <FilePicker value={file} files={files} onChange={changeFile} />
-        <span className="text-xs text-muted-foreground">
-          MDX Annotator{DEMO_MODE ? ' · demo (send simulated)' : ''}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            MDX Annotator{DEMO_MODE ? ' · demo (send simulated)' : ''}
+          </span>
+          <SettingsModal settings={settings} onSave={saveSettings} />
+        </div>
       </header>
 
       <main className="mx-auto max-w-2xl px-6 py-16">
