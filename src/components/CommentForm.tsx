@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { AnnotationContext, Severity } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface CommentFormProps {
   rect: DOMRect;
@@ -10,8 +10,6 @@ interface CommentFormProps {
   onSubmit: (comment: string, severity: Severity) => void;
   onCancel: () => void;
 }
-
-const SEVERITIES: Severity[] = ['bug', 'suggestion', 'question'];
 
 export function CommentForm({ rect, context: _context, onSubmit, onCancel }: CommentFormProps) {
   const [comment, setComment] = useState('');
@@ -26,24 +24,13 @@ export function CommentForm({ rect, context: _context, onSubmit, onCancel }: Com
   return (
     <div style={style} className="z-50 w-96">
       <div className="rounded-lg border bg-popover p-3 shadow-md space-y-2">
-        <div className="flex rounded-md border overflow-hidden text-xs font-medium">
-          {SEVERITIES.map((s) => (
-            <button
-              key={s}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => setSeverity(s)}
-              className={cn(
-                'flex-1 py-1.5 capitalize transition-colors',
-                severity === s
-                  ? 'bg-neutral-900 text-white'
-                  : 'text-neutral-600 hover:bg-neutral-50',
-              )}
-            >
-              {s}
-            </button>
-          ))}
-        </div>
+        <Tabs value={severity} onValueChange={(v) => setSeverity(v as Severity)}>
+          <TabsList className="w-full">
+            <TabsTrigger value="bug" className="flex-1">Bug</TabsTrigger>
+            <TabsTrigger value="suggestion" className="flex-1">Suggestion</TabsTrigger>
+            <TabsTrigger value="question" className="flex-1">Question</TabsTrigger>
+          </TabsList>
+        </Tabs>
         <Textarea
           value={comment}
           onChange={(e) => setComment(e.target.value)}

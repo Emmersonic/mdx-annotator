@@ -23,7 +23,7 @@ export function MDXRenderer({ file, renderAnnotatable }: MDXRendererProps) {
     setContent(null);
     setError(null);
 
-    fetch(`/content/${file}`)
+    fetch(`${import.meta.env.BASE_URL}content/${file}`)
       .then((r) => {
         if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
         return r.text();
