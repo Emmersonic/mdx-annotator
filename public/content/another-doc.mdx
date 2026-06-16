@@ -1,0 +1,49 @@
+# API Reference: `send-comment`
+
+This second document exists to prove the file picker works. Switch back and forth using
+the dropdown in the top-left — the `?file=` URL parameter updates so the view is shareable.
+
+## Endpoint
+
+`POST /api/send-comment` accepts a single annotation and sends one email to the configured
+Linear intake address. One annotation in, one Linear issue out.
+
+### Request body
+
+The body is a JSON `Annotation` object:
+
+```json
+{
+  "id": "uuid",
+  "comment": "This example is unclear",
+  "severity": "suggestion",
+  "context": {
+    "quote": "the selected text",
+    "prefix": "up to 60 chars before",
+    "suffix": "up to 60 chars after",
+    "blockType": "paragraph",
+    "elementPath": "article > p:nth-of-type(3)",
+    "mdxFile": "another-doc.mdx"
+  }
+}
+```
+
+### Responses
+
+- `200 { ok: true }` — email sent (or `simulated: true` when no API key is configured)
+- `400` — malformed annotation
+- `405` — method other than POST
+- `500` — Resend failed
+
+> Without a `RESEND_API_KEY`, the endpoint simulates success so the demo completes the
+> full flow. Wire real credentials in `.env.local` to send actual mail.
+
+## Severities
+
+| Severity     | Use it when…                          |
+| ------------ | ------------------------------------- |
+| `bug`        | The content is factually wrong        |
+| `suggestion` | It works but could read better        |
+| `question`   | You need the author to clarify intent |
+
+Select a table cell, a heading, or this closing line to queue feedback against this file.

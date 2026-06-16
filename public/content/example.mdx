@@ -1,0 +1,49 @@
+# Getting Started with the Annotator
+
+Welcome to the **MDX Annotator** — a lightweight tool for reviewing documentation.
+Select any text in this document and a small *+ comment* pill appears. Drop a note,
+pick a severity, and it queues in the bottom-right. Each comment can be sent as its
+own Linear issue.
+
+This paragraph exists so you have something ordinary to highlight. Try selecting the
+phrase "something ordinary to highlight" and leaving a suggestion.
+
+## Why runtime MDX?
+
+The document you are reading was fetched as plain text and compiled **in the browser**.
+That is what makes arbitrary review possible — there is no build step tied to a fixed
+set of files. The tradeoff is that MDX files must not use `import` statements, since the
+browser has no module resolver.
+
+> Treat this blockquote as a callout. Reviewers often disagree with the framing in a
+> callout, so it is a good target for a `question` severity annotation.
+
+### Things you can annotate
+
+- A whole **list item**, like this one about block-level context
+- Inline `code` spans inside a sentence
+- A heading (try selecting the heading above)
+- Any run of body text across two sentences
+
+## A code sample
+
+Code blocks render through Shiki with the `github-dark` theme. Selecting inside a code
+block tags the annotation as a `codeBlock` so downstream tooling knows it points at source.
+
+```ts
+export function greet(name: string): string {
+  // Reviewers might flag this comment as unnecessary
+  return `Hello, ${name}!`;
+}
+
+const message = greet("reviewer");
+console.log(message);
+```
+
+## What happens on send
+
+Each annotation carries structured context: the exact quote, up to 60 characters of
+surrounding text on each side, the block type, an element path, and the file name. That
+payload is enough for an AI agent to re-locate the text and apply a fix.
+
+Select this final sentence and send it to see the full round-trip in the queue.
